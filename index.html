@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="./favicon.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180">
+<title>パスワード生成</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f2f2f7;
+  --card: rgba(255,255,255,.94);
+  --surface: #f9f9fb;
+  --line: #d1d1d6;
+  --text: #1d1d1f;
+  --sub: #6e6e73;
+  --blue: #007aff;
+  --blue-hover: #006be6;
+  --green: #34c759;
+  --red: #ff3b30;
+  --orange: #ff9500;
+  --radius: 18px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", Meiryo, sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button,
+input,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+  width: min(860px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 0 0 28px;
+  position: relative;
+}
+
+.info-positioner {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100vw;
+  min-height: 44px;
+  margin: 0 0 10px calc(50% - 50vw);
+  padding: 4px max(14px, env(safe-area-inset-right)) 4px max(14px, env(safe-area-inset-left));
+  background: transparent;
+}
+
+.info-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d1d1d6;
+  border-radius: 11px;
+  background: #ffffff;
+  color: #333333;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: none;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.info-btn:hover {
+  background: #f5f5f7;
+  border-color: #c7c7cc;
+  color: #1d1d1f;
+}
+
+.info-btn:active {
+  transform: scale(.98);
+}
+
+.info-btn:focus-visible {
+  outline: 3px solid rgba(0,122,255,.25);
+  outline-offset: 2px;
+}
+
+.tool-card {
+  background: var(--card);
+  border: 1px solid rgba(60,60,67,.12);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 35px rgba(0,0,0,.07);
+  padding: 18px;
+}
+
+.section {
+  background: var(--surface);
+  border: 1px solid rgba(60,60,67,.11);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.section + .section {
+  margin-top: 10px;
+}
+
+.field-layout {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.setting-row + .setting-row {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(60,60,67,.10);
+}
+
+.label-title {
+  display: block;
+  padding-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3a3a3c;
+  white-space: nowrap;
+}
+
+.field-content {
+  min-width: 0;
+}
+
+.result-row {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 44px minmax(68px,.62fr) minmax(108px,1.1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+input[type="text"],
+input[type="number"] {
+  height: 40px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+input[type="text"] {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: .045em;
+}
+
+input[type="number"] {
+  width: 105px;
+}
+
+input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0,122,255,.14);
+}
+
+.action-btn {
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: transform .16s ease, filter .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(.97);
+}
+
+.action-btn:active {
+  transform: scale(.98);
+}
+
+.action-btn:focus-visible {
+  outline: 3px solid rgba(0,122,255,.24);
+  outline-offset: 2px;
+}
+
+.generate-btn {
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--blue);
+  border: 1px solid var(--line);
+}
+
+.generate-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+.clear-btn {
+  background: #ffffff;
+  color: #48484a;
+  border: 1px solid var(--line);
+  font-weight: 500;
+}
+
+.copy-btn {
+  background: var(--blue);
+  color: #fff;
+}
+
+.status-row {
+  min-height: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+#message,
+#strength {
+  overflow-wrap: anywhere;
+}
+
+#message {
+  color: var(--green);
+}
+
+#message.error {
+  color: var(--red);
+}
+
+#message.info {
+  color: var(--blue);
+}
+
+#strength.weak {
+  color: var(--red);
+}
+
+#strength.medium {
+  color: var(--orange);
+}
+
+#strength.strong {
+  color: var(--green);
+}
+
+#strength.best {
+  color: var(--blue);
+}
+
+.length-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.length-slider {
+  min-width: 160px;
+  flex: 1;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+.length-value {
+  min-width: 42px;
+  text-align: right;
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.character-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.base-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  min-height: 40px;
+  align-items: center;
+}
+
+.base-types label,
+.symbol-master,
+.option-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+.symbol-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.symbol-master {
+  margin-top: 11px;
+  white-space: nowrap;
+}
+
+.symbol-list {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 15px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.symbol-list label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font: 400 15px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  cursor: pointer;
+}
+
+.option-row .label-title {
+  padding-top: 2px;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  place-items: center;
+  padding: 22px;
+  background: rgba(0,0,0,.46);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal.open {
+  display: grid;
+}
+
+.modal-box {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 44px);
+  background: #fff;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+
+.modal-box img {
+  display: block;
+  width: 100%;
+  max-height: calc(100vh - 80px);
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(118,118,128,.18);
+  color: #3a3a3c;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .info-positioner {
+    width: 100%;
+    margin: 0 0 8px;
+    padding: 3px 0;
+    min-height: 42px;
+  }
+
+  .app-shell {
+    width: min(100% - 24px, 860px);
+    padding: 0 0 16px;
+  }
+
+  .info-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .tool-card {
+    padding: 12px;
+    border-radius: 15px;
+  }
+
+  .section {
+    padding: 11px 12px;
+  }
+
+  .field-layout {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .label-title {
+    padding-top: 0;
+  }
+
+  .result-row {
+    grid-template-columns: 44px minmax(66px,.68fr) minmax(98px,1.1fr);
+  }
+
+  .result-row input {
+    grid-column: 1 / -1;
+  }
+
+  .length-controls {
+    flex-wrap: wrap;
+  }
+
+  input[type="number"] {
+    width: 100%;
+  }
+
+  .length-slider {
+    min-width: calc(100% - 58px);
+  }
+
+  .symbol-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .symbol-master {
+    margin-top: 0;
+  }
+
+  .symbol-list {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .tool-card {
+    padding: 10px;
+  }
+
+  .section {
+    padding: 10px;
+  }
+
+  .result-row {
+    gap: 8px;
+    grid-template-columns: 42px minmax(60px,.66fr) minmax(90px,1.08fr);
+  }
+
+  .action-btn {
+    padding: 0 10px;
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+</style>
+</head>
+<body>
+<main class="app-shell">
+  <div class="info-positioner">
+    <button class="info-btn" type="button" aria-label="インフォメーションを表示" title="インフォメーション">i</button>
+  </div>
+
+  <section class="tool-card" aria-label="パスワード生成ツール">
+    <div class="section">
+      <div class="field-layout">
+        <label class="label-title" for="password">生成結果</label>
+
+        <div class="field-content">
+          <div class="result-row">
+            <input id="password" type="text" readonly placeholder="ここにパスワードが表示されます">
+
+            <button class="action-btn generate-btn" type="button" id="generateBtn" aria-label="パスワードを更新" title="パスワードを更新">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 6v5h-5M4 18v-5h5M6.1 8.4A7 7 0 0 1 18.9 7L20 11M17.9 15.6A7 7 0 0 1 5.1 17L4 13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+
+            <button class="action-btn clear-btn" type="button" id="clearBtn">クリア</button>
+            <button class="action-btn copy-btn" type="button" id="copyBtn">コピー</button>
+          </div>
+
+          <div class="status-row">
+            <div id="message" role="status" aria-live="polite"></div>
+            <div id="strength" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="setting-row field-layout">
+        <label class="label-title" for="length">文字数</label>
+
+        <div class="field-content length-controls">
+          <input id="length" type="number" min="1" max="128" value="12" inputmode="numeric">
+          <input id="lengthSlider" class="length-slider" type="range" min="1" max="128" value="12">
+          <span class="length-value" id="lengthValue">12</span>
+        </div>
+      </div>
+
+      <div class="setting-row field-layout">
+        <span class="label-title">使用する文字種</span>
+
+        <div class="field-content character-options">
+          <div class="base-types">
+            <label><input id="uppercase" type="checkbox" checked> 英大文字 A-Z</label>
+            <label><input id="lowercase" type="checkbox" checked> 英小文字 a-z</label>
+            <label><input id="numbers" type="checkbox" checked> 数字 0-9</label>
+          </div>
+
+          <div class="symbol-row">
+            <label class="symbol-master"><input id="symbols" type="checkbox" checked> 記号</label>
+
+            <div class="symbol-list" id="symbol-list">
+              <label><input type="checkbox" class="symbol-cb" value="!" checked>!</label>
+              <label><input type="checkbox" class="symbol-cb" value="@" checked>@</label>
+              <label><input type="checkbox" class="symbol-cb" value="#" checked>#</label>
+              <label><input type="checkbox" class="symbol-cb" value="$" checked>$</label>
+              <label><input type="checkbox" class="symbol-cb" value="%" checked>%</label>
+              <label><input type="checkbox" class="symbol-cb" value="^" checked>^</label>
+              <label><input type="checkbox" class="symbol-cb" value="&amp;" checked>&amp;</label>
+              <label><input type="checkbox" class="symbol-cb" value="*" checked>*</label>
+              <label><input type="checkbox" class="symbol-cb" value="-" checked>-</label>
+              <label><input type="checkbox" class="symbol-cb" value="+" checked>+</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-row field-layout option-row">
+        <span class="label-title">オプション</span>
+
+        <div class="field-content">
+          <label class="option-label">
+            <input id="excludeAmbiguous" type="checkbox" checked>
+            紛らわしい文字を除外（i, l, 1, I, o, 0, O）
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="infoModal" role="dialog" aria-modal="true" aria-label="インフォメーション" aria-hidden="true">
+  <div class="modal-box">
+    <button class="modal-close" type="button" aria-label="閉じる">×</button>
+    <img src="pompomboo-tools.png" alt="ツールのインフォメーション">
+  </div>
+</div>
+
+<script>
+const CHARS = {
+  uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  lowercase: "abcdefghijklmnopqrstuvwxyz",
+  numbers: "0123456789"
+};
+
+const AMBIGUOUS_CHARS = new Set(["i", "l", "1", "I", "o", "0", "O"]);
+
+const lengthInput = document.getElementById("length");
+const lengthSlider = document.getElementById("lengthSlider");
+const lengthValue = document.getElementById("lengthValue");
+const uppercaseInput = document.getElementById("uppercase");
+const lowercaseInput = document.getElementById("lowercase");
+const numbersInput = document.getElementById("numbers");
+const symbolsInput = document.getElementById("symbols");
+const symbolCbs = document.querySelectorAll(".symbol-cb");
+const excludeAmbiguousInput = document.getElementById("excludeAmbiguous");
+const passwordInput = document.getElementById("password");
+const message = document.getElementById("message");
+const strength = document.getElementById("strength");
+const generateBtn = document.getElementById("generateBtn");
+const clearBtn = document.getElementById("clearBtn");
+const copyBtn = document.getElementById("copyBtn");
+
+function clearSettings() {
+  lengthInput.value = 12;
+  lengthSlider.value = 12;
+  lengthValue.textContent = 12;
+
+  uppercaseInput.checked = true;
+  lowercaseInput.checked = true;
+  numbersInput.checked = true;
+  symbolsInput.checked = true;
+  symbolsInput.indeterminate = false;
+
+  symbolCbs.forEach(cb => cb.checked = true);
+
+  excludeAmbiguousInput.checked = true;
+  passwordInput.value = "";
+
+  setMessage("");
+  clearStrengthDisplay();
+}
+
+function setMessage(text, type = "") {
+  message.textContent = text;
+  message.className = type;
+}
+
+function removeAmbiguousChars(chars) {
+  return [...chars].filter(char => !AMBIGUOUS_CHARS.has(char)).join("");
+}
+
+function getRandomInt(maxExclusive) {
+  if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) {
+    throw new Error("乱数生成範囲が不正です。");
+  }
+
+  const maxUint32 = 0xFFFFFFFF;
+  const limit = maxUint32 - (maxUint32 % maxExclusive);
+  const randomValues = new Uint32Array(1);
+  let value;
+
+  do {
+    crypto.getRandomValues(randomValues);
+    value = randomValues[0];
+  } while (value >= limit);
+
+  return value % maxExclusive;
+}
+
+function buildCharacterSets() {
+  const selectedSets = [];
+
+  if (uppercaseInput.checked) selectedSets.push(CHARS.uppercase);
+  if (lowercaseInput.checked) selectedSets.push(CHARS.lowercase);
+  if (numbersInput.checked) selectedSets.push(CHARS.numbers);
+
+  const selectedSymbols = Array.from(symbolCbs)
+    .filter(cb => cb.checked)
+    .map(cb => cb.value)
+    .join("");
+
+  if (selectedSymbols.length > 0) {
+    selectedSets.push(selectedSymbols);
+  }
+
+  return excludeAmbiguousInput.checked
+    ? selectedSets.map(removeAmbiguousChars).filter(chars => chars.length > 0)
+    : selectedSets;
+}
+
+function shuffleSecure(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = getRandomInt(i + 1);
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+
+  return array;
+}
+
+function clampLength(value) {
+  const min = Number(lengthInput.min);
+  const max = Number(lengthInput.max);
+  const numericValue = Number(value);
+
+  if (!Number.isFinite(numericValue)) {
+    return Number(lengthInput.value) || 12;
+  }
+
+  return Math.min(max, Math.max(min, Math.trunc(numericValue)));
+}
+
+function syncLength(value, shouldGenerate = true) {
+  const length = clampLength(value);
+
+  lengthInput.value = length;
+  lengthSlider.value = length;
+  lengthValue.textContent = length;
+
+  if (shouldGenerate) {
+    generatePassword();
+  }
+}
+
+function getStrengthInfo(entropy) {
+  if (entropy < 40) return { label: "弱", className: "weak" };
+  if (entropy < 60) return { label: "中", className: "medium" };
+  if (entropy < 80) return { label: "強", className: "strong" };
+
+  return { label: "最強", className: "best" };
+}
+
+function updateStrengthDisplay(length, poolSize) {
+  if (!poolSize || poolSize <= 0) {
+    clearStrengthDisplay();
+    return;
+  }
+
+  const entropy = length * Math.log2(poolSize);
+  const info = getStrengthInfo(entropy);
+
+  strength.textContent = `強度：${info.label}（${entropy.toFixed(1)} bit）`;
+  strength.className = info.className;
+}
+
+function clearStrengthDisplay() {
+  strength.textContent = "";
+  strength.className = "";
+}
+
+function generatePassword() {
+  setMessage("");
+
+  if (!window.crypto || !crypto.getRandomValues) {
+    passwordInput.value = "";
+    setMessage("このブラウザーは crypto.getRandomValues() に対応していません。", "error");
+    clearStrengthDisplay();
+    return;
+  }
+
+  const length = Number(lengthInput.value);
+  const selectedSets = buildCharacterSets();
+
+  if (!Number.isInteger(length) || length < 1 || length > 128) {
+    passwordInput.value = "";
+    setMessage("文字数は1〜128の整数で指定してください。", "error");
+    clearStrengthDisplay();
+    return;
+  }
+
+  if (selectedSets.length === 0) {
+    passwordInput.value = "";
+    setMessage("英大文字・英小文字・数字・記号のうち、少なくとも1つを選択してください。", "error");
+    clearStrengthDisplay();
+    return;
+  }
+
+  if (length < selectedSets.length) {
+    passwordInput.value = "";
+    setMessage("選択した文字種を必ず含めるには、文字数を選択中の文字種数以上にしてください。", "error");
+    clearStrengthDisplay();
+    return;
+  }
+
+  const allChars = selectedSets.join("");
+  const passwordChars = [];
+
+  for (const set of selectedSets) {
+    passwordChars.push(set[getRandomInt(set.length)]);
+  }
+
+  while (passwordChars.length < length) {
+    passwordChars.push(allChars[getRandomInt(allChars.length)]);
+  }
+
+  passwordInput.value = shuffleSecure(passwordChars).join("");
+  updateStrengthDisplay(length, allChars.length);
+  setMessage("パスワードを生成しました。");
+}
+
+async function copyPassword() {
+  if (!passwordInput.value) {
+    setMessage("コピーするパスワードがありません。", "error");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(passwordInput.value);
+    setMessage("クリップボードにコピーしました。");
+  } catch (error) {
+    passwordInput.select();
+    document.execCommand("copy");
+    setMessage("コピーしました。");
+  }
+}
+
+generateBtn.addEventListener("click", generatePassword);
+clearBtn.addEventListener("click", clearSettings);
+copyBtn.addEventListener("click", copyPassword);
+
+lengthInput.addEventListener("input", () => syncLength(lengthInput.value));
+lengthSlider.addEventListener("input", () => syncLength(lengthSlider.value));
+
+symbolsInput.addEventListener("change", event => {
+  symbolCbs.forEach(cb => cb.checked = event.target.checked);
+  generatePassword();
+});
+
+symbolCbs.forEach(cb => {
+  cb.addEventListener("change", () => {
+    const allChecked = Array.from(symbolCbs).every(item => item.checked);
+    const noneChecked = Array.from(symbolCbs).every(item => !item.checked);
+
+    symbolsInput.checked = allChecked;
+    symbolsInput.indeterminate = !allChecked && !noneChecked;
+
+    generatePassword();
+  });
+});
+
+[
+  uppercaseInput,
+  lowercaseInput,
+  numbersInput,
+  excludeAmbiguousInput
+].forEach(input => input.addEventListener("change", generatePassword));
+
+const modal = document.getElementById("infoModal");
+const modalClose = modal.querySelector(".modal-close");
+const infoButtons = document.querySelectorAll(".info-btn");
+
+let lastFocused = null;
+
+function openModal() {
+  lastFocused = document.activeElement;
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  modalClose.focus();
+}
+
+function closeModal() {
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+
+  if (lastFocused) {
+    lastFocused.focus();
+  }
+}
+
+infoButtons.forEach(btn => btn.addEventListener("click", openModal));
+modalClose.addEventListener("click", closeModal);
+
+modal.addEventListener("click", event => {
+  if (event.target === modal) {
+    closeModal();
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && modal.classList.contains("open")) {
+    closeModal();
+  }
+});
+
+syncLength(lengthInput.value, false);
+generatePassword();
+</script>
+</body>
+</html>
